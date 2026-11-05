@@ -1,0 +1,151 @@
+# Implementation Plan: Galaxy Watch 9 to Health Connect Cloud Bridge (HealthSync Gateway)
+Build an Android phone application (`HealthSync Gateway`) that reads health data synchronized from a Samsung Galaxy Watch 9 via Android Health Connect, maps valid readings to the Health Digital Twin REST API contract (`POST /api/health-records`), manages a local Room outbox for reliable background/offline synchronization with WorkManager, and displays sync status, data previews, permission state, and settings using Jetpack Compose (Material 3).
+## User Review Required
+> [!IMPORTANT]
+> **Cloud Contract Field Completeness Rule**: The backend endpoint `POST /api/health-records` requires all 6 parameters (`steps`, `calories`, `distance`, `spo2`, `temperature`, `syncCount`). Per requirements, we **NEVER** substitute zero or fake values if a permission is denied or a reading is missing. When any required metric is missing, the bridge holds the record in Room as `MISSING_REQUIRED_FIELDS` and displays an explicit status in the UI to notify the user.
+> [!NOTE]
+> **Network Security Configuration**: Local HTTP testing (e.g. `http://192.168.1.25:8080`) is supported via a custom `res/xml/network_security_config.xml` permitting cleartext HTTP only for local IP ranges, while enforcing HTTPS for all production URLs.
+---
+## Proposed Changes
+### Project Root Documentation
+#### [NEW] [IMPLEMENTATION_PLAN.md](file:///C:/Users/karthik/AndroidStudioProjects/HealthSyncGateway/IMPLEMENTATION_PLAN.md)
+- Export full copy of implementation plan to project root directory for external tool review and reference.
+---
+### Build Configuration & Dependencies
+#### [MODIFY] [libs.versions.toml](file:///C:/Users/karthik/AndroidStudioProjects/HealthSyncGateway/gradle/libs.versions.toml)
+#### [MODIFY] [build.gradle.kts](file:///C:/Users/karthik/AndroidStudioProjects/HealthSyncGateway/build.gradle.kts)
+#### [MODIFY] [app/build.gradle.kts](file:///C:/Users/karthik/AndroidStudioProjects/HealthSyncGateway/app/build.gradle.kts)
+- Add version definitions and dependencies for:
+  - Jetpack Compose BOM & Navigation Compose (`androidx.navigation:navigation-compose`)
+  - Jetpack Health Connect (`androidx.health.connect:connect-client:1.1.0-alpha11` or latest stable)
+  - Room Database (`androidx.room:room-runtime`, `androidx.room:room-ktx`, `androidx.room:room-compiler` via KSP)
+  - WorkManager (`androidx.work:work-runtime-ktx`)
+  - DataStore Preferences (`androidx.datastore:datastore-preferences`)
+  - Retrofit & OkHttp (`com.squareup.retrofit2:retrofit`, `com.squareup.retrofit2:converter-gson`, `com.squareup.okhttp3:logging-interceptor`)
+  - Lifecycle ViewModel Compose (`androidx.lifecycle:lifecycle-viewmodel-compose`, `androidx.lifecycle:lifecycle-runtime-compose`)
+  - Testing libraries: MockK, Coroutines Test, WorkManager Test, Room Test, Espresso
+---
+### Manifest, Resources & Configuration
+#### [MODIFY] [AndroidManifest.xml](file:///C:/Users/karthik/AndroidStudioProjects/HealthSyncGateway/app/src/main/AndroidManifest.xml)
+- Declare Health Connect read permissions for:
+  - `READ_STEPS`
+  - `READ_DISTANCE`
+  - `READ_ACTIVE_CALORIES_BURNED`
+  - `READ_HEART_RATE`
+  - `READ_OXYGEN_SATURATION`
+  - `READ_BODY_TEMPERATURE` / `READ_SKIN_TEMPERATURE`
+  - `READ_EXERCISE`
+  - `READ_SLEEP`
+- Declare intent filter for Health Connect permissions rationale action (`androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE`).
+- Add network permission (`android.permission.INTERNET`, `ACCESS_NETWORK_STATE`).
+- Link network security config.
+#### [NEW] [network_security_config.xml](file:///C:/Users/karthik/AndroidStudioProjects/HealthSyncGateway/app/src/main/res/xml/network_security_config.xml)
+- Configure cleartext HTTP traffic allowed for local IP addresses (e.g. `10.0.2.2`, `192.168.x.x`, `127.0.0.1`, `localhost`) for dev server testing.
+#### [NEW] [strings.xml](file:///C:/Users/karthik/AndroidStudioProjects/HealthSyncGateway/app/src/main/res/values/strings.xml)
+- Define localized strings for onboarding, permissions rationale, connection state, warnings, and settings.
+---
+### Data Layer: Models, Room Database & Preferences
+#### [NEW] [HealthRecordPayload.kt](file:///C:/Users/karthik/AndroidStudioProjects/HealthSyncGateway/app/src/main/java/com/example/healthsyncgateway/data/model/HealthRecordPayload.kt)
+- Define `HealthRecordRequest`, `HealthParameters`, and API response data classes (`HealthRecordResponse`, `ApiErrorResponse`).
+#### [NEW] [OutboxEntity.kt](file:///C:/Users/karthik/AndroidStudioProjects/HealthSyncGateway/app/src/main/java/com/example/healthsyncgateway/data/local/OutboxEntity.kt)
+- Room entity representing queued health record sync attempts:
+  - `eventId`: Stable unique key (`userId + sourceRecordId + recordType + startTime + endTime`)
+  - `userId`, `platform`, `timestamp`
+  - `steps`, `calories` (active), `distance` (meters), `spo2` (%), `temperature` (°C), `syncCount`
+  - `extendedDataJson`: Extra metrics (heart rate, sleep, exercise) stored for future contract versions or preview
+  - `status`: `PENDING`, `UPLOADED`, `FAILED_RETRYABLE`, `MISSING_REQUIRED_FIELDS`
+  - `missingFields`: Comma-separated list of missing permissions/data fields
+  - `lastErrorMessage`: Diagnostic failure reason
+  - `createdAt`, `updatedAt`, `retryCount`
+#### [NEW] [OutboxDao.kt](file:///C:/Users/karthik/AndroidStudioProjects/HealthSyncGateway/app/src/main/java/com/example/healthsyncgateway/data/local/OutboxDao.kt)
+- Room DAO operations: insert/upsert, get pending records, update status, count pending items, get latest records for preview, clear outbox.
+#### [NEW] [SyncCursorEntity.kt & SyncCursorDao.kt](file:///C:/Users/karthik/AndroidStudioProjects/HealthSyncGateway/app/src/main/java/com/example/healthsyncgateway/data/local/SyncCursorEntity.kt)
+- Room entity and DAO for tracking last successful Health Connect read time, last successful cloud upload time, and monotonic `syncCount`.
+#### [NEW] [AppDatabase.kt](file:///C:/Users/karthik/AndroidStudioProjects/HealthSyncGateway/app/src/main/java/com/example/healthsyncgateway/data/local/AppDatabase.kt)
+- RoomDatabase implementation with schema migration strategy (Version 1).
+#### [NEW] [UserPreferencesRepository.kt](file:///C:/Users/karthik/AndroidStudioProjects/HealthSyncGateway/app/src/main/java/com/example/healthsyncgateway/data/repository/UserPreferencesRepository.kt)
+- DataStore manager for settings:
+  - `userId` (Default: `user_samsung_watch9_twin`)
+  - `baseUrl` (Default: `http://10.0.2.2:8080` for emulator or `http://192.168.1.25:8080`)
+  - `syncFrequencyMinutes` (Default: 15)
+  - `wifiOnly` (Default: false)
+  - `onboardingCompleted` (Default: false)
+---
+### Health Connect & Network Integration Layer
+#### [NEW] [HealthConnectManager.kt](file:///C:/Users/karthik/AndroidStudioProjects/HealthSyncGateway/app/src/main/java/com/example/healthsyncgateway/data/healthconnect/HealthConnectManager.kt)
+- Wrapper around `HealthConnectClient`:
+  - Availability check (`SDK_AVAILABLE`, `SDK_UNAVAILABLE`, `SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED`).
+  - Required permission set declaration (`Set<String>`).
+  - Check granted permissions & missing permissions.
+  - Query Health Connect for time window (StepsRecord, DistanceRecord, ActiveCaloriesBurnedRecord, HeartRateRecord, OxygenSaturationRecord, BodyTemperatureRecord, SkinTemperatureRecord, ExerciseSessionRecord, SleepSessionRecord).
+  - Map readings with accurate metric conversion (meters for distance, active calories in kcal, % SpO2, °C temperature).
+  - Extract record source metadata to verify Samsung Watch 9 origin where applicable.
+  - Map field status: `PRESENT`, `PERMISSION_DENIED`, `NO_RECORD`, `UNSUPPORTED`.
+#### [NEW] [HealthApiService.kt](file:///C:/Users/karthik/AndroidStudioProjects/HealthSyncGateway/app/src/main/java/com/example/healthsyncgateway/data/remote/HealthApiService.kt)
+- Retrofit interface for cloud backend:
+  - `POST /api/health-records`
+  - `GET /api/health-records/status`
+  - `GET /api/health-records/latest`
+#### [NEW] [ApiClientProvider.kt](file:///C:/Users/karthik/AndroidStudioProjects/HealthSyncGateway/app/src/main/java/com/example/healthsyncgateway/data/remote/ApiClientProvider.kt)
+- Dynamically creates/recreates Retrofit service when `baseUrl` changes in Settings.
+#### [NEW] [HealthSyncRepository.kt](file:///C:/Users/karthik/AndroidStudioProjects/HealthSyncGateway/app/src/main/java/com/example/healthsyncgateway/data/repository/HealthSyncRepository.kt)
+- Main repository coordinating:
+  1. Health Connect data reading & mapping.
+  2. Outbox persistence in Room.
+  3. Field validation (ensuring all 6 required fields are present).
+  4. Uploading pending records to cloud API.
+  5. Monotonic counter increment (`syncCount`) upon success.
+  6. Cursor update.
+  7. Thread-safe execution using Mutex to prevent manual & WorkManager sync overlap.
+---
+### Background Sync (WorkManager)
+#### [NEW] [SyncWorker.kt](file:///C:/Users/karthik/AndroidStudioProjects/HealthSyncGateway/app/src/main/java/com/example/healthsyncgateway/data/worker/SyncWorker.kt)
+- `CoroutineWorker` executing background sync:
+  - Reads settings (wifiOnly constraint, userId).
+  - Triggers `HealthSyncRepository.performSync()`.
+  - Configures exponential backoff retry on failure.
+#### [NEW] [SyncScheduler.kt](file:///C:/Users/karthik/AndroidStudioProjects/HealthSyncGateway/app/src/main/java/com/example/healthsyncgateway/data/worker/SyncScheduler.kt)
+- Helper class to schedule or cancel unique periodic work (`PeriodicWorkRequestBuilder`) based on user-configured frequency and Wi-Fi constraint.
+---
+### UI Layer (Jetpack Compose & ViewModel)
+#### [NEW] [Screen.kt & HealthSyncNavGraph.kt](file:///C:/Users/karthik/AndroidStudioProjects/HealthSyncGateway/app/src/main/java/com/example/healthsyncgateway/ui/navigation/HealthSyncNavGraph.kt)
+- Navigation destinations: `Onboarding`, `Permissions`, `Dashboard`, `DataPreview`, `Settings`.
+#### [NEW] [MainViewModel.kt](file:///C:/Users/karthik/AndroidStudioProjects/HealthSyncGateway/app/src/main/java/com/example/healthsyncgateway/ui/viewmodel/MainViewModel.kt)
+- Centralized UI state manager exposing `StateFlow`:
+  - `connectionState`: Ready, Permission Required, Waiting for Data, Offline, Retrying, Uploaded.
+  - `lastReadTime`, `lastUploadTime`, `pendingOutboxCount`, `lastError`.
+  - `recordsPreviewList`: Detailed list of recent Health Connect readings with field status tags.
+  - `permissionStateMap`: Map of permission -> status (Granted/Denied).
+  - Actions: `syncNow()`, `clearOutbox()`, `updateSettings()`, `requestPermissions()`.
+#### [NEW] [OnboardingScreen.kt](file:///C:/Users/karthik/AndroidStudioProjects/HealthSyncGateway/app/src/main/java/com/example/healthsyncgateway/ui/screens/OnboardingScreen.kt)
+- Visual step-by-step guide explaining data path (Galaxy Watch 9 → Samsung Health → Health Connect → Gateway → Cloud), privacy, and consent requirements.
+#### [NEW] [PermissionsScreen.kt](file:///C:/Users/karthik/AndroidStudioProjects/HealthSyncGateway/app/src/main/java/com/example/healthsyncgateway/ui/screens/PermissionsScreen.kt)
+- Health Connect status card, permission list with toggle status, button to launch Health Connect permissions dialog, and guidance card for enabling Samsung Health sync in Health Connect settings.
+#### [NEW] [DashboardScreen.kt](file:///C:/Users/karthik/AndroidStudioProjects/HealthSyncGateway/app/src/main/java/com/example/healthsyncgateway/ui/screens/DashboardScreen.kt)
+- Connection state badge, metrics cards (Steps, Calories, Distance, SpO2, Temperature, Sync Count), last sync timestamps, pending outbox count, quick "Sync Now" action.
+#### [NEW] [DataPreviewScreen.kt](file:///C:/Users/karthik/AndroidStudioProjects/HealthSyncGateway/app/src/main/java/com/example/healthsyncgateway/ui/screens/DataPreviewScreen.kt)
+- Preview card list showing latest Health Connect records before upload, record source device/app, timestamp, unit, and explicit badges for missing/unsupported fields.
+#### [NEW] [SettingsScreen.kt](file:///C:/Users/karthik/AndroidStudioProjects/HealthSyncGateway/app/src/main/java/com/example/healthsyncgateway/ui/screens/SettingsScreen.kt)
+- Inputs for User ID and Cloud Base URL (with quick-select options for local dev vs production), sync interval dropdown, Wi-Fi only switch, Clear Outbox button, Reconfigure Permissions link.
+#### [NEW] [MainActivity.kt & Theme](file:///C:/Users/karthik/AndroidStudioProjects/HealthSyncGateway/app/src/main/java/com/example/healthsyncgateway/MainActivity.kt)
+- Entry point initializing UI theme, top/bottom navigation bar, and routing.
+---
+### Documentation & Deliverables
+#### [NEW] [README.md](file:///C:/Users/karthik/AndroidStudioProjects/HealthSyncGateway/README.md)
+- Complete setup guide, architecture breakdown, local backend endpoint testing instructions (`http://<lan-ip>:8080`), permission setup instructions, troubleshooting guide for Samsung Health watch sync, and Health Connect record mapping matrix.
+---
+## Verification Plan
+### Automated Tests
+1. **Unit Tests (`app/src/test/java/...`)**:
+   - `HealthConnectDataMapperTest`: Test conversion of meters, active calories (not total), SpO2 percentage, temperature (°C), missing field handling (ensuring zero is NEVER fabricated).
+   - `StableEventIdTest`: Test stable ID generation (`userId + sourceRecordId + recordType + startTime + endTime`).
+   - `OutboxEntityValidationTest`: Test that incomplete records transition to `MISSING_REQUIRED_FIELDS` state without uploading.
+   - `HealthSyncRepositoryTest`: Test manual sync flow, successful POST handling, HTTP 400/409/5xx response handling, and monotonic `syncCount` increment logic.
+2. **Instrumentation Tests (`app/src/androidTest/java/...`)**:
+   - `OutboxDaoTest`: Test Room database CRUD operations, pending count queries, and outbox state transitions using `inMemoryDatabaseBuilder`.
+   - `SyncWorkerTest`: Test WorkManager execution and retry rules.
+### Manual Verification
+1. Build and assemble project using `./gradlew assembleDebug`.
+2. Launch application on test device or emulator.
+3. Test settings modification (changing Base URL to local dev IP).
+4. Verify onboarding flow, permission request handling, dashboard state updates, data preview tags, and manual sync execution.

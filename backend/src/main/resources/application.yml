@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: health-twin-dashboard
+  datasource:
+    url: jdbc:h2:file:./data/healthdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+    show-sql: false
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: false
+
+server:
+  port: ${PORT:8080}
+
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
+  dashboard:
+    data-refresh-ms: 5000
+    default-hours: 24

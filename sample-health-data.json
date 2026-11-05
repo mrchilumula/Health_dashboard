@@ -1,0 +1,13 @@
+{
+  "userId": "user_samsung_watch9_twin",
+  "platform": "Samsung Galaxy Watch 9 & Galaxy Phone",
+  "timestamp": 1793200661908,
+  "healthParameters": {
+    "steps": 1250,
+    "calories": 180.5,
+    "distance": 950.0,
+    "spo2": 98.0,
+    "temperature": 36.6,
+    "syncCount": 5
+  }
+}

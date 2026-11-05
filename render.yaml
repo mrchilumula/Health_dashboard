@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: health-twin-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /api/health-records/status
+    envVars:
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
