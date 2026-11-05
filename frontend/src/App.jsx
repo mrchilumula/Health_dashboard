@@ -11,7 +11,9 @@ import {
 } from 'recharts';
 
 const SAMPLE_USER_ID = 'user_samsung_watch9_twin';
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '');
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '')
+  .replace(/\/api\/?$/, '')
+  .replace(/\/$/, '');
 
 const metricConfig = [
   { key: 'steps', label: 'Steps', unit: 'steps', color: '#4facfe' },
