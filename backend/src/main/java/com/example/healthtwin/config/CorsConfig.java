@@ -10,6 +10,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class CorsConfig {
 
+    private static final String VERCEL_FRONTEND_ORIGIN = "https://health-twin-dashboard-six.vercel.app";
+
     @Value("${app.cors.allowed-origins}")
     private String allowedOrigins;
 
@@ -19,7 +21,7 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/api/**")
-                        .allowedOrigins(Arrays.stream(allowedOrigins.split(","))
+                        .allowedOrigins(Arrays.stream((allowedOrigins + "," + VERCEL_FRONTEND_ORIGIN).split(","))
                                 .map(String::trim)
                                 .filter(origin -> !origin.isEmpty())
                                 .toArray(String[]::new))
