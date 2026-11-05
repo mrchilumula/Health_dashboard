@@ -7,5 +7,5 @@ services:
     plan: free
     healthCheckPath: /api/health-records/status
     envVars:
-      - key: CORS_ALLOWED_ORIGINS
+      - key: APP_CORS_ALLOWED_ORIGINS
         sync: false
