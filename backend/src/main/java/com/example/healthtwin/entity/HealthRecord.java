@@ -42,16 +42,16 @@ public class HealthRecord {
     @Column(name = "steps", nullable = false)
     private Integer steps;
 
-    @Column(name = "calories", nullable = false)
+    @Column(name = "calories")
     private Double calories;
 
     @Column(name = "distance", nullable = false)
     private Double distance;
 
-    @Column(name = "spo2", nullable = false)
+    @Column(name = "spo2")
     private Double spo2;
 
-    @Column(name = "temperature", nullable = false)
+    @Column(name = "temperature")
     private Double temperature;
 
     @Column(name = "sync_count", nullable = false)

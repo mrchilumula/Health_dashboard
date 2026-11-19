@@ -59,7 +59,6 @@ public class HealthDataRequest {
         @PositiveOrZero(message = "steps must be zero or greater")
         private Integer steps;
 
-        @NotNull(message = "calories is required")
         @PositiveOrZero(message = "calories must be zero or greater")
         private Double calories;
 
@@ -67,11 +66,9 @@ public class HealthDataRequest {
         @PositiveOrZero(message = "distance must be zero or greater")
         private Double distance;
 
-        @NotNull(message = "spo2 is required")
         @PositiveOrZero(message = "spo2 must be zero or greater")
         private Double spo2;
 
-        @NotNull(message = "temperature is required")
         @PositiveOrZero(message = "temperature must be zero or greater")
         private Double temperature;
 

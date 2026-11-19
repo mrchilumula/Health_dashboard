@@ -105,17 +105,28 @@ public class HealthRecordService {
 
         List<HealthRecordDto> recentRecords = records.stream().map(this::toDto).collect(Collectors.toList());
         summary.setRecentRecords(recentRecords);
-        summary.setLatestSteps(Double.valueOf(recentRecords.get(0).getSteps()));
+        summary.setLatestSteps(recentRecords.get(0).getSteps() == null
+                ? null
+                : Double.valueOf(recentRecords.get(0).getSteps()));
         summary.setLatestCalories(recentRecords.get(0).getCalories());
         summary.setLatestDistance(recentRecords.get(0).getDistance());
         summary.setLatestSpO2(recentRecords.get(0).getSpo2());
         summary.setLatestTemperature(recentRecords.get(0).getTemperature());
 
         double avgSteps = records.stream().mapToDouble(r -> r.getSteps()).average().orElse(0.0);
-        double avgCalories = records.stream().mapToDouble(r -> r.getCalories()).average().orElse(0.0);
+        double avgCalories = records.stream()
+                .filter(r -> r.getCalories() != null)
+                .mapToDouble(r -> r.getCalories())
+                .average().orElse(0.0);
         double avgDistance = records.stream().mapToDouble(r -> r.getDistance()).average().orElse(0.0);
-        double avgSpo2 = records.stream().mapToDouble(r -> r.getSpo2()).average().orElse(0.0);
-        double avgTemperature = records.stream().mapToDouble(r -> r.getTemperature()).average().orElse(0.0);
+        double avgSpo2 = records.stream()
+                .filter(r -> r.getSpo2() != null)
+                .mapToDouble(r -> r.getSpo2())
+                .average().orElse(0.0);
+        double avgTemperature = records.stream()
+                .filter(r -> r.getTemperature() != null)
+                .mapToDouble(r -> r.getTemperature())
+                .average().orElse(0.0);
 
         summary.setAverageSteps(avgSteps);
         summary.setAverageCalories(avgCalories);
