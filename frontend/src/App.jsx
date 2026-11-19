@@ -277,7 +277,7 @@ export default function App() {
             </div>
             <div className="twin-metrics">
               <div><span>SpO₂</span><strong>{latestRecord ? `${latestRecord.spo2}%` : '—'}</strong></div>
-              <div><span>Temperature</span><strong>{latestRecord ? `${latestRecord.temperature.toFixed(1)}°C` : '—'}</strong></div>
+              <div><span>Temperature</span><strong>{latestRecord?.temperature == null ? '—' : `${latestRecord.temperature.toFixed(1)}°C`}</strong></div>
               <div><span>Sync count</span><strong>{latestRecord ? latestRecord.syncCount : '—'}</strong></div>
             </div>
           </div>
@@ -404,7 +404,7 @@ export default function App() {
                   <td>{record.calories}</td>
                   <td>{(record.distance / 1000).toFixed(2)} km</td>
                   <td>{record.spo2}%</td>
-                  <td>{record.temperature.toFixed(1)}°C</td>
+                  <td>{record.temperature == null ? '—' : `${record.temperature.toFixed(1)}°C`}</td>
                   <td>{record.syncCount}</td>
                 </tr>
               ))}
