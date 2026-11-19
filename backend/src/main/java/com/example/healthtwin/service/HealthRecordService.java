@@ -147,6 +147,7 @@ public class HealthRecordService {
         dto.setPlatform(record.getPlatform());
         dto.setEventTimestamp(record.getEventTimestamp());
         dto.setEventTime(record.getEventTime());
+        dto.setCreatedAt(record.getCreatedAt());
         dto.setSteps(record.getSteps());
         dto.setCalories(record.getCalories());
         dto.setDistance(record.getDistance());

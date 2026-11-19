@@ -227,7 +227,7 @@ export default function App() {
       <main className="dashboard">
         <section className="summary-row">
           <div className="summary-card"><span>Backend/cloud</span><strong>{status === 'live' ? 'Available' : status === 'demo' ? 'Demo mode' : 'Unavailable'}</strong></div>
-          <div className="summary-card"><span>Last successful sync</span><strong>{latestRecord ? formatTimestamp(latestRecord.eventTimestamp) : 'No data yet'}</strong></div>
+          <div className="summary-card"><span>Last successful upload</span><strong>{latestRecord ? formatDateTime(latestRecord.createdAt) : 'No data yet'}</strong></div>
           <div className="summary-card"><span>Last received reading</span><strong>{latestRecord ? formatTimestamp(latestRecord.eventTimestamp) : '—'}</strong></div>
         </section>
 

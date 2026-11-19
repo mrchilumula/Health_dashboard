@@ -10,6 +10,8 @@ public class HealthRecordDto {
     private Long eventTimestamp;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createdAt;
     private Integer steps;
     private Double calories;
     private Double distance;
@@ -58,6 +60,14 @@ public class HealthRecordDto {
 
     public void setEventTime(LocalDateTime eventTime) {
         this.eventTime = eventTime;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
     public Integer getSteps() {
