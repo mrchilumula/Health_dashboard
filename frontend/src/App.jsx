@@ -11,7 +11,7 @@ import {
 } from 'recharts';
 
 const SAMPLE_USER_ID = 'user_samsung_watch9_twin';
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '')
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'https://health-twin-backend-6tqh.onrender.com')
   .replace(/\/api\/?$/, '')
   .replace(/\/$/, '');
 
@@ -160,7 +160,7 @@ export default function App() {
   }, [range]);
 
   useEffect(() => {
-    const source = new EventSource(`${API_BASE_URL}/health-records/events`);
+    const source = new EventSource(`${API_BASE_URL}/api/health-records/events`);
     source.onmessage = (event) => {
       try {
         const record = JSON.parse(event.data);
@@ -183,8 +183,10 @@ export default function App() {
     const previous = records[1] || null;
     return metricConfig.map((metric) => {
       const keys = { steps: 'steps', calories: 'calories', distance: 'distance', spo2: 'spo2', temperature: 'temperature', syncCount: 'syncCount' };
-      const currentValue = current[keys[metric.key]];
-      const previousValue = previous ? previous[keys[metric.key]] : null;
+      const currentValue = metric.key === 'distance' ? current.distance / 1000 : current[keys[metric.key]];
+      const previousValue = previous
+        ? (metric.key === 'distance' ? previous.distance / 1000 : previous[keys[metric.key]])
+        : null;
       return {
         ...metric,
         value: currentValue,
