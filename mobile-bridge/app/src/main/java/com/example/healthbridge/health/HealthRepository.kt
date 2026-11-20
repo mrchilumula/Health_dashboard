@@ -268,36 +268,56 @@ class HealthRepository(
     }
 
     suspend fun uploadPending(): Result<String> {
-        val item = database.dao().firstPending()
-            ?: return Result.success("No pending uploads")
         val api = createApi(preferences.baseUrl)
-        val now = System.currentTimeMillis()
-        val request = try {
-            moshiAdapter().fromJson(item.payloadJson)
-        } catch (error: Exception) {
-            database.dao().markFailed(item.eventId, now, "Invalid local payload")
-            preferences.lastError = "Invalid local payload"
-            return Result.failure(error)
-        } ?: return Result.failure(IllegalStateException("Invalid local payload"))
+        var uploaded = 0
+        var lastFailure: Result<String>? = null
 
-        return try {
-            val response = api.upload(request)
-            if (response.isSuccessful) {
-                database.dao().markUploaded(item.eventId, now)
-                preferences.lastSuccessfulUploadMillis = now
-                preferences.lastError = null
-                Result.success("Uploaded")
-            } else {
-                val message = httpError(response.code(), response.message())
+        while (true) {
+            val item = database.dao().firstPending() ?: break
+            val now = System.currentTimeMillis()
+            val request: HealthDataRequest? = try {
+                moshiAdapter().fromJson(item.payloadJson)
+            } catch (error: Exception) {
+                database.dao().markFailed(item.eventId, now, "Invalid local payload")
+                preferences.lastError = "Invalid local payload"
+                lastFailure = Result.failure(error)
+                break
+            }
+            if (request == null) {
+                val error = IllegalStateException("Invalid local payload")
+                database.dao().markFailed(item.eventId, now, "Invalid local payload")
+                preferences.lastError = "Invalid local payload"
+                lastFailure = Result.failure(error)
+                break
+            }
+
+            try {
+                val response = api.upload(request)
+                if (response.isSuccessful) {
+                    database.dao().markUploaded(item.eventId, now)
+                    preferences.lastSuccessfulUploadMillis = now
+                    preferences.lastError = null
+                    uploaded++
+                } else {
+                    val message = httpError(response.code(), response.message())
+                    database.dao().markFailed(item.eventId, now, message)
+                    preferences.lastError = message
+                    lastFailure = Result.failure(IllegalStateException(message))
+                    break
+                }
+            } catch (error: Exception) {
+                val message = error.message?.take(180) ?: "Network failure"
                 database.dao().markFailed(item.eventId, now, message)
                 preferences.lastError = message
-                Result.failure(IllegalStateException(message))
+                lastFailure = Result.failure(error)
+                break
             }
-        } catch (error: Exception) {
-            val message = error.message?.take(180) ?: "Network failure"
-            database.dao().markFailed(item.eventId, now, message)
-            preferences.lastError = message
-            Result.failure(error)
+        }
+
+        return lastFailure ?: if (uploaded == 0) {
+            Result.success("No pending uploads")
+        } else {
+            Result.success("Uploaded $uploaded item(s)")
         }
     }
 
