@@ -103,7 +103,14 @@ The Galaxy Watch sensor hardware and Samsung Health app can support more measure
 
 ## Database
 
-This project uses an H2 file database at `backend/data/healthdb.mv.db` by default. It is persistent across restarts when the same project directory is used. For production, replace the datasource configuration with a managed database such as PostgreSQL or MySQL and use environment variables.
+Local development uses the H2 file database at `backend/data/healthdb.mv.db`.
+
+The Render deployment uses PostgreSQL through the `DATABASE_URL` environment variable:
+
+- `render.yaml` defines a managed `health-twin-db` PostgreSQL database.
+- The backend converts Render's `postgres://` or `postgresql://` URL into a JDBC URL.
+- Hibernate creates or updates the `health_records` table with `ddl-auto: update`.
+- H2 remains available for local development and tests.
 
 ## Real-time behavior
 
