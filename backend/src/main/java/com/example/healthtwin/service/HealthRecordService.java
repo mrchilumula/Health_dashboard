@@ -187,7 +187,8 @@ public class HealthRecordService {
         String raw = request.getUserId() + "|" + request.getPlatform() + "|" + request.getTimestamp() + "|" +
                 request.getHealthParameters().getSteps() + "|" + request.getHealthParameters().getCalories() + "|" +
                 request.getHealthParameters().getDistance() + "|" + request.getHealthParameters().getSpo2() + "|" +
-                request.getHealthParameters().getTemperature() + "|" + request.getHealthParameters().getHeartRate() + "|" +
+                request.getHealthParameters().getTemperature() + "|" +
+                request.getHealthParameters().getHeartRate() + "|" +
                 request.getHealthParameters().getRestingHeartRate() + "|" + request.getHealthParameters().getHrvRmssd() + "|" +
                 request.getHealthParameters().getRespiratoryRate() + "|" + request.getHealthParameters().getSystolicBloodPressure() + "|" +
                 request.getHealthParameters().getDiastolicBloodPressure() + "|" + request.getHealthParameters().getBloodGlucose() + "|" +
