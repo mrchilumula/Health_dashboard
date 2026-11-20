@@ -10,7 +10,7 @@ import {
   YAxis
 } from 'recharts';
 
-const SAMPLE_USER_ID = 'user_samsung_watch9_twin';
+const SAMPLE_USER_ID = 'karthik';
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'https://health-twin-backend-6tqh.onrender.com')
   .replace(/\/api\/?$/, '')
   .replace(/\/$/, '');
