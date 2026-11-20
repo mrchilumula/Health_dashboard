@@ -54,6 +54,20 @@ public class HealthRecord {
     @Column(name = "temperature")
     private Double temperature;
 
+    @Column(name = "heart_rate") private Double heartRate;
+    @Column(name = "resting_heart_rate") private Double restingHeartRate;
+    @Column(name = "hrv_rmssd") private Double hrvRmssd;
+    @Column(name = "respiratory_rate") private Double respiratoryRate;
+    @Column(name = "systolic_blood_pressure") private Double systolicBloodPressure;
+    @Column(name = "diastolic_blood_pressure") private Double diastolicBloodPressure;
+    @Column(name = "blood_glucose") private Double bloodGlucose;
+    @Column(name = "weight_kg") private Double weightKg;
+    @Column(name = "height_m") private Double heightM;
+    @Column(name = "floors_climbed") private Double floorsClimbed;
+    @Column(name = "hydration_liters") private Double hydrationLiters;
+    @Column(name = "sleep_hours") private Double sleepHours;
+    @Column(name = "exercise_minutes") private Double exerciseMinutes;
+
     @Column(name = "sync_count", nullable = false)
     private Integer syncCount;
 
@@ -145,6 +159,33 @@ public class HealthRecord {
     public void setTemperature(Double temperature) {
         this.temperature = temperature;
     }
+
+    public Double getHeartRate() { return heartRate; }
+    public void setHeartRate(Double heartRate) { this.heartRate = heartRate; }
+    public Double getRestingHeartRate() { return restingHeartRate; }
+    public void setRestingHeartRate(Double restingHeartRate) { this.restingHeartRate = restingHeartRate; }
+    public Double getHrvRmssd() { return hrvRmssd; }
+    public void setHrvRmssd(Double hrvRmssd) { this.hrvRmssd = hrvRmssd; }
+    public Double getRespiratoryRate() { return respiratoryRate; }
+    public void setRespiratoryRate(Double respiratoryRate) { this.respiratoryRate = respiratoryRate; }
+    public Double getSystolicBloodPressure() { return systolicBloodPressure; }
+    public void setSystolicBloodPressure(Double systolicBloodPressure) { this.systolicBloodPressure = systolicBloodPressure; }
+    public Double getDiastolicBloodPressure() { return diastolicBloodPressure; }
+    public void setDiastolicBloodPressure(Double diastolicBloodPressure) { this.diastolicBloodPressure = diastolicBloodPressure; }
+    public Double getBloodGlucose() { return bloodGlucose; }
+    public void setBloodGlucose(Double bloodGlucose) { this.bloodGlucose = bloodGlucose; }
+    public Double getWeightKg() { return weightKg; }
+    public void setWeightKg(Double weightKg) { this.weightKg = weightKg; }
+    public Double getHeightM() { return heightM; }
+    public void setHeightM(Double heightM) { this.heightM = heightM; }
+    public Double getFloorsClimbed() { return floorsClimbed; }
+    public void setFloorsClimbed(Double floorsClimbed) { this.floorsClimbed = floorsClimbed; }
+    public Double getHydrationLiters() { return hydrationLiters; }
+    public void setHydrationLiters(Double hydrationLiters) { this.hydrationLiters = hydrationLiters; }
+    public Double getSleepHours() { return sleepHours; }
+    public void setSleepHours(Double sleepHours) { this.sleepHours = sleepHours; }
+    public Double getExerciseMinutes() { return exerciseMinutes; }
+    public void setExerciseMinutes(Double exerciseMinutes) { this.exerciseMinutes = exerciseMinutes; }
 
     public Integer getSyncCount() {
         return syncCount;

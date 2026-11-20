@@ -59,6 +59,19 @@ public class HealthRecordService {
         record.setDistance(request.getHealthParameters().getDistance());
         record.setSpo2(request.getHealthParameters().getSpo2());
         record.setTemperature(request.getHealthParameters().getTemperature());
+        record.setHeartRate(request.getHealthParameters().getHeartRate());
+        record.setRestingHeartRate(request.getHealthParameters().getRestingHeartRate());
+        record.setHrvRmssd(request.getHealthParameters().getHrvRmssd());
+        record.setRespiratoryRate(request.getHealthParameters().getRespiratoryRate());
+        record.setSystolicBloodPressure(request.getHealthParameters().getSystolicBloodPressure());
+        record.setDiastolicBloodPressure(request.getHealthParameters().getDiastolicBloodPressure());
+        record.setBloodGlucose(request.getHealthParameters().getBloodGlucose());
+        record.setWeightKg(request.getHealthParameters().getWeightKg());
+        record.setHeightM(request.getHealthParameters().getHeightM());
+        record.setFloorsClimbed(request.getHealthParameters().getFloorsClimbed());
+        record.setHydrationLiters(request.getHealthParameters().getHydrationLiters());
+        record.setSleepHours(request.getHealthParameters().getSleepHours());
+        record.setExerciseMinutes(request.getHealthParameters().getExerciseMinutes());
         record.setSyncCount(request.getHealthParameters().getSyncCount());
         record.setDedupeKey(dedupeKey);
         record.setCreatedAt(LocalDateTime.now());
@@ -153,6 +166,19 @@ public class HealthRecordService {
         dto.setDistance(record.getDistance());
         dto.setSpo2(record.getSpo2());
         dto.setTemperature(record.getTemperature());
+        dto.setHeartRate(record.getHeartRate());
+        dto.setRestingHeartRate(record.getRestingHeartRate());
+        dto.setHrvRmssd(record.getHrvRmssd());
+        dto.setRespiratoryRate(record.getRespiratoryRate());
+        dto.setSystolicBloodPressure(record.getSystolicBloodPressure());
+        dto.setDiastolicBloodPressure(record.getDiastolicBloodPressure());
+        dto.setBloodGlucose(record.getBloodGlucose());
+        dto.setWeightKg(record.getWeightKg());
+        dto.setHeightM(record.getHeightM());
+        dto.setFloorsClimbed(record.getFloorsClimbed());
+        dto.setHydrationLiters(record.getHydrationLiters());
+        dto.setSleepHours(record.getSleepHours());
+        dto.setExerciseMinutes(record.getExerciseMinutes());
         dto.setSyncCount(record.getSyncCount());
         return dto;
     }
@@ -161,7 +187,14 @@ public class HealthRecordService {
         String raw = request.getUserId() + "|" + request.getPlatform() + "|" + request.getTimestamp() + "|" +
                 request.getHealthParameters().getSteps() + "|" + request.getHealthParameters().getCalories() + "|" +
                 request.getHealthParameters().getDistance() + "|" + request.getHealthParameters().getSpo2() + "|" +
-                request.getHealthParameters().getTemperature() + "|" + request.getHealthParameters().getSyncCount();
+                request.getHealthParameters().getTemperature() + "|" + request.getHealthParameters().getHeartRate() + "|" +
+                request.getHealthParameters().getRestingHeartRate() + "|" + request.getHealthParameters().getHrvRmssd() + "|" +
+                request.getHealthParameters().getRespiratoryRate() + "|" + request.getHealthParameters().getSystolicBloodPressure() + "|" +
+                request.getHealthParameters().getDiastolicBloodPressure() + "|" + request.getHealthParameters().getBloodGlucose() + "|" +
+                request.getHealthParameters().getWeightKg() + "|" + request.getHealthParameters().getHeightM() + "|" +
+                request.getHealthParameters().getFloorsClimbed() + "|" + request.getHealthParameters().getHydrationLiters() + "|" +
+                request.getHealthParameters().getSleepHours() + "|" + request.getHealthParameters().getExerciseMinutes() + "|" +
+                request.getHealthParameters().getSyncCount();
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(raw.getBytes(StandardCharsets.UTF_8));

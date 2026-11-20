@@ -17,6 +17,19 @@ public class HealthRecordDto {
     private Double distance;
     private Double spo2;
     private Double temperature;
+    private Double heartRate;
+    private Double restingHeartRate;
+    private Double hrvRmssd;
+    private Double respiratoryRate;
+    private Double systolicBloodPressure;
+    private Double diastolicBloodPressure;
+    private Double bloodGlucose;
+    private Double weightKg;
+    private Double heightM;
+    private Double floorsClimbed;
+    private Double hydrationLiters;
+    private Double sleepHours;
+    private Double exerciseMinutes;
     private Integer syncCount;
 
     public HealthRecordDto() {
@@ -109,6 +122,33 @@ public class HealthRecordDto {
     public void setTemperature(Double temperature) {
         this.temperature = temperature;
     }
+
+    public Double getHeartRate() { return heartRate; }
+    public void setHeartRate(Double heartRate) { this.heartRate = heartRate; }
+    public Double getRestingHeartRate() { return restingHeartRate; }
+    public void setRestingHeartRate(Double restingHeartRate) { this.restingHeartRate = restingHeartRate; }
+    public Double getHrvRmssd() { return hrvRmssd; }
+    public void setHrvRmssd(Double hrvRmssd) { this.hrvRmssd = hrvRmssd; }
+    public Double getRespiratoryRate() { return respiratoryRate; }
+    public void setRespiratoryRate(Double respiratoryRate) { this.respiratoryRate = respiratoryRate; }
+    public Double getSystolicBloodPressure() { return systolicBloodPressure; }
+    public void setSystolicBloodPressure(Double systolicBloodPressure) { this.systolicBloodPressure = systolicBloodPressure; }
+    public Double getDiastolicBloodPressure() { return diastolicBloodPressure; }
+    public void setDiastolicBloodPressure(Double diastolicBloodPressure) { this.diastolicBloodPressure = diastolicBloodPressure; }
+    public Double getBloodGlucose() { return bloodGlucose; }
+    public void setBloodGlucose(Double bloodGlucose) { this.bloodGlucose = bloodGlucose; }
+    public Double getWeightKg() { return weightKg; }
+    public void setWeightKg(Double weightKg) { this.weightKg = weightKg; }
+    public Double getHeightM() { return heightM; }
+    public void setHeightM(Double heightM) { this.heightM = heightM; }
+    public Double getFloorsClimbed() { return floorsClimbed; }
+    public void setFloorsClimbed(Double floorsClimbed) { this.floorsClimbed = floorsClimbed; }
+    public Double getHydrationLiters() { return hydrationLiters; }
+    public void setHydrationLiters(Double hydrationLiters) { this.hydrationLiters = hydrationLiters; }
+    public Double getSleepHours() { return sleepHours; }
+    public void setSleepHours(Double sleepHours) { this.sleepHours = sleepHours; }
+    public Double getExerciseMinutes() { return exerciseMinutes; }
+    public void setExerciseMinutes(Double exerciseMinutes) { this.exerciseMinutes = exerciseMinutes; }
 
     public Integer getSyncCount() {
         return syncCount;

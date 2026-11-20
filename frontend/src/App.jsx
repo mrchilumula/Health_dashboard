@@ -21,6 +21,19 @@ const metricConfig = [
   { key: 'distance', label: 'Distance', unit: 'km', color: '#6ce0a3' },
   { key: 'spo2', label: 'SpO₂', unit: '%', color: '#7a6cff' },
   { key: 'temperature', label: 'Temperature', unit: '°C', color: '#f7c948' },
+  { key: 'heartRate', label: 'Heart rate', unit: 'bpm', color: '#e85d5d' },
+  { key: 'restingHeartRate', label: 'Resting HR', unit: 'bpm', color: '#ef8b8b' },
+  { key: 'hrvRmssd', label: 'HRV RMSSD', unit: 'ms', color: '#9a78d0' },
+  { key: 'respiratoryRate', label: 'Respiratory', unit: '/min', color: '#58a6d1' },
+  { key: 'systolicBloodPressure', label: 'Systolic BP', unit: 'mmHg', color: '#f08a8a' },
+  { key: 'diastolicBloodPressure', label: 'Diastolic BP', unit: 'mmHg', color: '#f0a5a5' },
+  { key: 'bloodGlucose', label: 'Blood glucose', unit: 'mmol/L', color: '#d7a24b' },
+  { key: 'weightKg', label: 'Weight', unit: 'kg', color: '#70b5a2' },
+  { key: 'heightM', label: 'Height', unit: 'm', color: '#70b58f' },
+  { key: 'floorsClimbed', label: 'Floors', unit: 'floors', color: '#63b4a4' },
+  { key: 'hydrationLiters', label: 'Hydration', unit: 'L', color: '#5bb9d8' },
+  { key: 'sleepHours', label: 'Sleep', unit: 'hours', color: '#7a6cff' },
+  { key: 'exerciseMinutes', label: 'Exercise', unit: 'minutes', color: '#9d79cf' },
   { key: 'syncCount', label: 'Sync', unit: 'count', color: '#58d1c9' }
 ];
 
@@ -182,7 +195,15 @@ export default function App() {
     const current = latestRecord;
     const previous = records[1] || null;
     return metricConfig.map((metric) => {
-      const keys = { steps: 'steps', calories: 'calories', distance: 'distance', spo2: 'spo2', temperature: 'temperature', syncCount: 'syncCount' };
+      const keys = {
+        steps: 'steps', calories: 'calories', distance: 'distance', spo2: 'spo2', temperature: 'temperature',
+        heartRate: 'heartRate', restingHeartRate: 'restingHeartRate', hrvRmssd: 'hrvRmssd',
+        respiratoryRate: 'respiratoryRate', systolicBloodPressure: 'systolicBloodPressure',
+        diastolicBloodPressure: 'diastolicBloodPressure', bloodGlucose: 'bloodGlucose',
+        weightKg: 'weightKg', heightM: 'heightM', floorsClimbed: 'floorsClimbed',
+        hydrationLiters: 'hydrationLiters', sleepHours: 'sleepHours',
+        exerciseMinutes: 'exerciseMinutes', syncCount: 'syncCount'
+      };
       const currentValue = metric.key === 'distance' ? current.distance / 1000 : current[keys[metric.key]];
       const previousValue = previous
         ? (metric.key === 'distance' ? previous.distance / 1000 : previous[keys[metric.key]])
@@ -204,6 +225,19 @@ export default function App() {
       distance: row.distance / 1000,
       spo2: row.spo2,
       temperature: row.temperature,
+      heartRate: row.heartRate,
+      restingHeartRate: row.restingHeartRate,
+      hrvRmssd: row.hrvRmssd,
+      respiratoryRate: row.respiratoryRate,
+      systolicBloodPressure: row.systolicBloodPressure,
+      diastolicBloodPressure: row.diastolicBloodPressure,
+      bloodGlucose: row.bloodGlucose,
+      weightKg: row.weightKg,
+      heightM: row.heightM,
+      floorsClimbed: row.floorsClimbed,
+      hydrationLiters: row.hydrationLiters,
+      sleepHours: row.sleepHours,
+      exerciseMinutes: row.exerciseMinutes,
       syncCount: row.syncCount
     }));
   }, [records]);
@@ -278,6 +312,18 @@ export default function App() {
             <div className="twin-metrics">
               <div><span>SpO₂</span><strong>{latestRecord ? `${latestRecord.spo2}%` : '—'}</strong></div>
               <div><span>Temperature</span><strong>{latestRecord?.temperature == null ? '—' : `${latestRecord.temperature.toFixed(1)}°C`}</strong></div>
+              <div><span>Heart rate</span><strong>{latestRecord?.heartRate == null ? '—' : `${latestRecord.heartRate.toFixed(1)} bpm`}</strong></div>
+              <div><span>Resting HR</span><strong>{latestRecord?.restingHeartRate == null ? '—' : `${latestRecord.restingHeartRate.toFixed(1)} bpm`}</strong></div>
+              <div><span>HRV RMSSD</span><strong>{latestRecord?.hrvRmssd == null ? '—' : `${latestRecord.hrvRmssd.toFixed(1)} ms`}</strong></div>
+              <div><span>Respiratory</span><strong>{latestRecord?.respiratoryRate == null ? '—' : `${latestRecord.respiratoryRate.toFixed(1)} /min`}</strong></div>
+              <div><span>Blood pressure</span><strong>{latestRecord?.systolicBloodPressure == null || latestRecord?.diastolicBloodPressure == null ? '—' : `${latestRecord.systolicBloodPressure.toFixed(0)}/${latestRecord.diastolicBloodPressure.toFixed(0)} mmHg`}</strong></div>
+              <div><span>Blood glucose</span><strong>{latestRecord?.bloodGlucose == null ? '—' : `${latestRecord.bloodGlucose.toFixed(2)} mmol/L`}</strong></div>
+              <div><span>Weight</span><strong>{latestRecord?.weightKg == null ? '—' : `${latestRecord.weightKg.toFixed(1)} kg`}</strong></div>
+              <div><span>Height</span><strong>{latestRecord?.heightM == null ? '—' : `${latestRecord.heightM.toFixed(2)} m`}</strong></div>
+              <div><span>Floors</span><strong>{latestRecord?.floorsClimbed == null ? '—' : latestRecord.floorsClimbed.toFixed(1)}</strong></div>
+              <div><span>Hydration</span><strong>{latestRecord?.hydrationLiters == null ? '—' : `${latestRecord.hydrationLiters.toFixed(2)} L`}</strong></div>
+              <div><span>Sleep</span><strong>{latestRecord?.sleepHours == null ? '—' : `${latestRecord.sleepHours.toFixed(1)} h`}</strong></div>
+              <div><span>Exercise</span><strong>{latestRecord?.exerciseMinutes == null ? '—' : `${latestRecord.exerciseMinutes.toFixed(0)} min`}</strong></div>
               <div><span>Sync count</span><strong>{latestRecord ? latestRecord.syncCount : '—'}</strong></div>
             </div>
           </div>
@@ -392,6 +438,18 @@ export default function App() {
                 <th>Distance</th>
                 <th>SpO₂</th>
                 <th>Temp</th>
+                <th>HR</th>
+                <th>Rest HR</th>
+                <th>HRV</th>
+                <th>Resp.</th>
+                <th>BP</th>
+                <th>Glucose</th>
+                <th>Weight</th>
+                <th>Height</th>
+                <th>Floors</th>
+                <th>Hydration</th>
+                <th>Sleep</th>
+                <th>Exercise</th>
                 <th>Sync</th>
               </tr>
             </thead>
@@ -405,6 +463,18 @@ export default function App() {
                   <td>{(record.distance / 1000).toFixed(2)} km</td>
                   <td>{record.spo2}%</td>
                   <td>{record.temperature == null ? '—' : `${record.temperature.toFixed(1)}°C`}</td>
+                  <td>{record.heartRate == null ? '—' : record.heartRate.toFixed(1)}</td>
+                  <td>{record.restingHeartRate == null ? '—' : record.restingHeartRate.toFixed(1)}</td>
+                  <td>{record.hrvRmssd == null ? '—' : record.hrvRmssd.toFixed(1)}</td>
+                  <td>{record.respiratoryRate == null ? '—' : record.respiratoryRate.toFixed(1)}</td>
+                  <td>{record.systolicBloodPressure == null || record.diastolicBloodPressure == null ? '—' : `${record.systolicBloodPressure.toFixed(0)}/${record.diastolicBloodPressure.toFixed(0)}`}</td>
+                  <td>{record.bloodGlucose == null ? '—' : record.bloodGlucose.toFixed(2)}</td>
+                  <td>{record.weightKg == null ? '—' : `${record.weightKg.toFixed(1)} kg`}</td>
+                  <td>{record.heightM == null ? '—' : `${record.heightM.toFixed(2)} m`}</td>
+                  <td>{record.floorsClimbed == null ? '—' : record.floorsClimbed.toFixed(1)}</td>
+                  <td>{record.hydrationLiters == null ? '—' : `${record.hydrationLiters.toFixed(2)} L`}</td>
+                  <td>{record.sleepHours == null ? '—' : `${record.sleepHours.toFixed(1)} h`}</td>
+                  <td>{record.exerciseMinutes == null ? '—' : `${record.exerciseMinutes.toFixed(0)} min`}</td>
                   <td>{record.syncCount}</td>
                 </tr>
               ))}
